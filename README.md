@@ -37,6 +37,7 @@ Currently supports the following devices:
 * Smoke & CO Alarm
 * Sprinkler Controller (YS4102, multi-zone)
 * Sprinkler Timer (YS4103, single-zone)
+* Solar Soil Sensor
 * Switch
 * Temperature and Humidity Sensor
 * Vibration Sensor (as a motion sensor)
@@ -147,7 +148,7 @@ If you see an error message in the log similar to the following then you are lik
   * **verboseLog** *(optional)*: Provides most detailed log information without having to enable Homebridge debug mode.
   * **liteLog** *(optional)*: HomeKit makes frequent requests for device status, this suppresses logging of every request (unless *verboseLog* is true). Requests that require message be sent to YoLink servers are still logged. Defaults to true.
   * **allDevices** *(optional)*: If set to false then only devices listed in the Devices section of the config file are loaded, and then only if the hide property is false. Defaults to true so all devices reported by YoLink are loaded (if device's *hide* property is false).
-  * **excludeTypes** *(optional)*: Array of YoLink device types that will be excluded even if *allDevices* is set to true. The currently supported list of device types is *Hub, SpeakerHub, VibrationSensor, MotionSensor, LeakSensor, Manipulator, THSensor, DoorSensor, Siren, Switch, Outlet, SmartRemoter, MultiOutlet, GarageDoor, Finger, Lock, LockV2, PowerFailureAlarm, Sprinkler* and *SprinklerV2*. Defaults to exclude Hub and Speaker Hub. Note that capitalization is important and values must be entered exactly as listed here.
+  * **excludeTypes** *(optional)*: Array of YoLink device types that will be excluded even if *allDevices* is set to true. The currently supported list of device types is *Hub, SpeakerHub, VibrationSensor, MotionSensor, LeakSensor, Manipulator, THSensor, DoorSensor, Siren, Switch, Outlet, SmartRemoter, MultiOutlet, GarageDoor, Finger, Lock, LockV2, PowerFailureAlarm, Sprinkler* and *SprinklerV2, SoilThcSensor*. Defaults to exclude Hub and Speaker Hub. Note that capitalization is important and values must be entered exactly as listed here.
   * **includeTypes** *(optional)*: Array of YoLink device types that will be included even if *allDevices* is set to false. Same list of device types as above with no default.
   * **checkNewDeviceInterval** *(optional)*: Interval (in seconds) to check for new YoLink devices added *or removed* from YoLink.  Defaults to zero (feature disabled). This feature will allow new devices to be detected and added to Homebridge/HomeKit without restarting the plugin. Also will detect when a device is deleted and remove it from Homebridge/HomeKit. Note that if a device requires config file changes then the plugin must be restarted to pick up config file changes. As this polls the YoLink server, a value less than 60 seconds is not recommended.
   * **enableExperimental** *(optional)*: If set to true, enables support for devices still considered experimental, see Device Notes below.
@@ -295,6 +296,18 @@ A YoLink siren has been implemented as a switch which can be turned on or off in
 >This plugin is not intended to provide safety or security services.
 
 YoLink smoke and carbon monoxide alarm are supported and the plugin assumes that both sensors are supported in the device.  If your device has only a smoke detector, or only a carbon monoxide detector, then you must hide the missing sensor in your config file. Set the *hide* configuration parameter to *co* or *smoke* to hide the unsupported sensor from HomeKit.
+
+### Solar Soil Sensor
+YoLink sensor for measuring soil temperature, moisture, and conducitivity.
+
+HomeKit service mapping:
+temperature -> TemperatureSensor (CurrentTemperature, °C)
+Soil Moisture -> HumiditySensor (CurrentRelativeHumidity, %)
+conductivity -> LightSensor (CurrentAmbientLightLevel, lux repurposed as µS/cm)
+HomeKit has no native soil conductivity service; LightSensor
+is the conventional homebridge workaround for a unitless numeric
+reading that supports automations. The minimum accepted lux value
+in HomeKit is 0.0001, so we clamp conductivity to that floor.
 
 ### Switch
 
